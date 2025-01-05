@@ -1,0 +1,13 @@
+{
+  "name": "nextjs-rust-monorepo",
+  "version": "1.0.0",
+  "scripts": {
+    "frontend": "npm run dev --workspace=frontend",
+    "backend": "cargo run backend",
+    "test-deployment": "docker compose up --build"
+  },
+  "author": "Alexander Cooper",
+  "license": "MIT",
+  "private": true,
+  "workspaces": ["frontend"]
+}
