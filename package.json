@@ -4,6 +4,7 @@
   "scripts": {
     "frontend": "npm run dev --workspace=frontend",
     "backend": "cargo run backend",
+    "database": "docker run -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 postgres",
     "test-deployment": "docker compose up --build"
   },
   "author": "Alexander Cooper",

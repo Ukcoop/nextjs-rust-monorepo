@@ -4,20 +4,20 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 export default function Home({ baseUrl }: { baseUrl: string }) {
-  const [response, setResponse] = useState({message: ''});
+  const [response, setResponse] = useState({messages: [ { message: 'loading' } ]});
 
   useEffect(() => {
     const getData = async () => {
-      const res = await axios.get(baseUrl);
+      const res = await axios.get(baseUrl + 'getMessages');
       setResponse(res.data);
     };
 
     getData();
-  });
+  }, [baseUrl]);
 
   return (
     <div>
-      message from server: {response.message}
+      messages from server: {response.messages.length}
     </div>
   );
 }
