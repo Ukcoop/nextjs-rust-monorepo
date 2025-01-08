@@ -55,7 +55,7 @@ async fn api_post_message(data: web::Json<Message>, app_state: Data<AppState>) -
         Err(_) => "".to_string(),
     };
 
-    if message_str == *"" {
+    if message_str == *"{\"message\":\"\"}" {
         return HttpResponse::Ok().body("error: could not post message");
     }
 
