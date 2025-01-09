@@ -25,6 +25,7 @@ pub async fn init_db() -> Result<Pool<Postgres>, sqlx::Error> {
     sqlx::query(
         "CREATE TABLE IF NOT EXISTS messages (
             id SERIAL PRIMARY KEY,
+            username TEXT NOT NULL,
             message TEXT NOT NULL
         )",
     )

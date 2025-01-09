@@ -3,40 +3,70 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
+import RefreshIcon from '@mui/icons-material/Refresh';
+
 import InputField from './components/inputField';
 import Button from './components/button';
+import Status from './components/status';
 
 export default function Home({ baseUrl }: { baseUrl: string }) {
-  const [response, setResponse] = useState({messages: [ { message: 'loading' } ]});
+  const [status, setStatus] = useState({ code: 'ok', data: '' });
+  const [reload, forceReload] = useState(true);
+
+  const [response, setResponse] = useState({ messages: [ { username: 'server', message: 'loading' } ] });
+  const [username, setUsername] = useState('username');
   const [message, setMessage] = useState('');
 
   const getMessages = async() => {
-    const res = await axios.get(baseUrl + 'getMessages');
-    setResponse(res.data);
+    setStatus({ code: 'ok', data: '' });
+
+    try {
+      const result = await axios.get(baseUrl + 'getMessages');
+
+      if(result.status != 200) {
+        setStatus({ code: 'error', data: 'could not get messages: ' + result.statusText });
+      } else {
+        setResponse(result.data);
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      setStatus({ code: 'error', data: 'could not get messages: ' + e.message });
+    }
   }
 
-  useEffect(() => { getMessages(); });
+  useEffect(() => { if(status.code != 'error') { getMessages(); }}, [reload]);
 
   const sendMessage = async() => {
-    const sendMessage = { message }
+    setStatus({ code: 'ok', data: '' });
 
-    const result = await axios.post(baseUrl + 'postMessage', sendMessage);
-    if(result.status != 200) {
-      // do error thing
+    const sendMessage = { username, message }
+    if (message == '') return;
+
+    try {
+      const result = await axios.post(baseUrl + 'postMessage', sendMessage);
+
+      if(result.status != 200) {
+        setStatus({ code: 'error', data: 'could not send message: ' + result.statusText });
+      } else {
+        setMessage('');
+        forceReload(!reload);
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      setStatus({ code: 'error', data: 'could not send message: ' + e.message });
     }
-
-    setMessage('');
-    getMessages();
   }
 
   return (
     <div className="h-screen max-h-screen bg-white dark:bg-gray-950">
       <div className="flex flex-col">
         <div className="flex pt-2 px-2">
+          <div className="w-64 pr-2"><InputField type="text" value={username} setValue={setUsername}/></div>
           <InputField type="text" value={message} setValue={setMessage}/>
           <Button text="send" style="primary" onClick={sendMessage}/>
-          <Button text="reload" style="secondary" onClick={getMessages}/>
+          <Button text={<RefreshIcon/>} style="secondary" onClick={getMessages}/>
         </div>
+        {(status.code !== 'ok') && <div className="px-2"><Status status={status}/></div>}
       </div>
         <div className="h-0 border-2 border-transparent border-t-gray-500"></div>
         <div className="h-[93vh] overflow-auto p-2">
@@ -44,6 +74,7 @@ export default function Home({ baseUrl }: { baseUrl: string }) {
           response.messages.map((message, index) => {
             return (
               <div className="flex align-center h-10 bg-sky-500/5 dark:bg-gray-500/5 border border-transparent border-b-sky-200 dark:border-b-gray-500" key={'message-' + index}>
+                {<a className="p-2 text-lg font-bold">{message.username}:</a>}
                 {<a className="p-2 text-lg">{message.message}</a>}
                 </div>
             );

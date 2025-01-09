@@ -4,7 +4,8 @@ const styles = {
 };
 
 interface ButtonParams {
-  text: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  text: any;
   style: keyof typeof styles;
   onClick: () => unknown;
 }

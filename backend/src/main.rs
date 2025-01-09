@@ -23,6 +23,7 @@ struct AppState {
 #[get("/api/")]
 async fn hello() -> impl Responder {
     let default_message = Message {
+        username: "Alexander".to_string(),
         message: "This is the backend if my app, you can get messages from /api/getMessages"
             .to_string(),
     };
@@ -38,6 +39,7 @@ async fn api_get_messages(app_state: Data<AppState>) -> impl Responder {
         Ok(result) => result,
         Err(e) => Messages {
             messages: vec![Message {
+                username: "server".to_string(),
                 message: format!("could not retrive messages: {}", e),
             }],
         },
@@ -50,16 +52,11 @@ async fn api_get_messages(app_state: Data<AppState>) -> impl Responder {
 
 #[post("/api/postMessage")]
 async fn api_post_message(data: web::Json<Message>, app_state: Data<AppState>) -> impl Responder {
-    let message_str = match serde_json::to_string(&data.into_inner()) {
-        Ok(result) => result,
-        Err(_) => "".to_string(),
-    };
-
-    if message_str == *"{\"message\":\"\"}" {
+    if data.message == *"" {
         return HttpResponse::Ok().body("error: could not post message");
     }
 
-    match post_message(message_str, &app_state.db).await {
+    match post_message(data, &app_state.db).await {
         Ok(_) => {}
         Err(e) => return HttpResponse::Ok().body(format!("error: could not post message, {}", e)),
     };
