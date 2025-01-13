@@ -1,6 +1,8 @@
-use actix_web::web;
+use actix_web::web::Json;
 use serde::{Deserialize, Serialize};
-use sqlx::{self, query, query_as, FromRow, Pool, Postgres};
+use sqlx::{Error, FromRow};
+
+use crate::services::database::Database;
 
 #[derive(Serialize, Deserialize, FromRow, Debug)]
 pub struct Message {
@@ -13,23 +15,20 @@ pub struct Messages {
     pub messages: Vec<Message>,
 }
 
-pub async fn get_messages(db: &Pool<Postgres>) -> Result<Messages, sqlx::Error> {
-    let rows = query_as::<_, Message>("SELECT username, message FROM messages")
-        .fetch_all(db)
-        .await?;
+pub async fn get_messages(db: &dyn Database) -> Result<Messages, Error> {
+    let rows = db.read_db("SELECT username, message FROM messages").await?;
 
-    Ok(Messages { messages: rows })
+    return Ok(Messages { messages: rows });
 }
 
-pub async fn post_message(
-    message: web::Json<Message>,
-    db: &Pool<Postgres>,
-) -> Result<(), sqlx::Error> {
-    query("INSERT INTO messages (username, message) VALUES ($1, $2)")
-        .bind(message.username.clone())
-        .bind(message.message.clone())
-        .execute(db)
-        .await?;
+pub async fn post_message(message: Json<Message>, db: &dyn Database) -> Result<(), Error> {
+    let data = vec![message.username.clone(), message.message.clone()];
 
-    Ok(())
+    db.write_db(
+        "INSERT INTO messages (username, message) VALUES ($1, $2)",
+        data,
+    )
+    .await?;
+
+    return Ok(());
 }

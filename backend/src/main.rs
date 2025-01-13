@@ -1,8 +1,7 @@
 use actix_cors::Cors;
-use actix_web::web;
 use actix_web::web::Data;
+use actix_web::web::Json;
 use actix_web::{get, post, App, HttpResponse, HttpServer, Responder};
-use sqlx::{Pool, Postgres};
 
 mod core;
 mod services;
@@ -10,14 +9,16 @@ mod services;
 use core::message_manager::Message;
 use core::message_manager::Messages;
 
+use services::database::DbWrapper;
+
 use core::message_manager::get_messages;
 use core::message_manager::post_message;
 
 use services::database::convert_sqlx_error;
 use services::database::init_db;
 
-struct AppState {
-    db: Pool<Postgres>,
+pub struct AppState {
+    pub db: DbWrapper,
 }
 
 #[get("/api/")]
@@ -51,7 +52,7 @@ async fn api_get_messages(app_state: Data<AppState>) -> impl Responder {
 }
 
 #[post("/api/postMessage")]
-async fn api_post_message(data: web::Json<Message>, app_state: Data<AppState>) -> impl Responder {
+async fn api_post_message(data: Json<Message>, app_state: Data<AppState>) -> impl Responder {
     if data.message == *"" {
         return HttpResponse::Ok().body("error: could not post message");
     }
@@ -66,8 +67,7 @@ async fn api_post_message(data: web::Json<Message>, app_state: Data<AppState>) -
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let db = convert_sqlx_error(init_db().await)?;
-
+    let db = convert_sqlx_error(init_db(false).await)?;
     let shared_state = Data::new(AppState { db });
 
     return HttpServer::new(move || {

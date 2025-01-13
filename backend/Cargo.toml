@@ -3,12 +3,16 @@ name = "backend"
 version = "0.1.0"
 edition = "2021"
 
+[profile.release]
+opt-level = 3
+
 [dependencies]
 actix-web = "4"
 actix-cors = "0.7"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-sqlx = { version = "0.8.3", features = ["runtime-async-std-native-tls", "postgres"] }
+sqlx = { version = "0.8.3", features = ["runtime-async-std-native-tls", "postgres", "sqlite"] }
+async-trait = "0.1"
 
 [lints.clippy]
 needless_return = "allow"
