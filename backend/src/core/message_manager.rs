@@ -35,14 +35,14 @@ pub async fn post_message(message: Json<Message>, db: &dyn Database) -> Result<(
 
 #[cfg(test)]
 mod tests {
-    use actix_web::web::Json;
-    use crate::{init_db, services::database::DbWrapper};
     use super::{get_messages, post_message, Message};
+    use crate::{init_db, services::database::DbWrapper};
+    use actix_web::web::Json;
 
     async fn initialize_test_db() -> DbWrapper {
-        return init_db(true).await.unwrap_or_else(|e| {
-            panic!("Error: failed to initialize database. {}", e)
-        });
+        return init_db(true)
+            .await
+            .unwrap_or_else(|e| panic!("Error: failed to initialize database. {}", e));
     }
 
     fn create_test_message() -> Message {
@@ -53,9 +53,9 @@ mod tests {
     }
 
     async fn post_test_message(db: &DbWrapper, message: Message) {
-        return post_message(Json(message), db).await.unwrap_or_else(|e| {
-            panic!("Error: failed to post message. {}", e)
-        });
+        return post_message(Json(message), db)
+            .await
+            .unwrap_or_else(|e| panic!("Error: failed to post message. {}", e));
     }
 
     #[tokio::test]
@@ -74,11 +74,10 @@ mod tests {
         match get_messages(&db).await {
             Ok(result) => {
                 assert_eq!(result.messages[0], test_message)
-            },
+            }
             Err(e) => {
                 panic!("Error: failed to get messages. {}", e)
             }
         }
     }
 }
-

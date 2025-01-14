@@ -6,7 +6,7 @@ use sqlx::{
     {Error, Pool, Postgres, Sqlite},
 };
 
-use crate::Message;
+use crate::core::message_manager::Message;
 
 #[async_trait::async_trait]
 pub trait Database: Send + Sync {
@@ -107,7 +107,7 @@ mod tests {
     #[tokio::test]
     async fn test_init_db() {
         match init_db(true).await {
-            Ok(_) => {},
+            Ok(_) => {}
             Err(e) => {
                 panic!("Error: failed to initialize database. {}", e)
             }
