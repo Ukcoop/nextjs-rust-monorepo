@@ -1,8 +1,10 @@
 use std::io;
 
-use sqlx::postgres::PgPoolOptions;
-use sqlx::sqlite::SqlitePoolOptions;
-use sqlx::{Error, Pool, Postgres, Sqlite};
+use sqlx::{
+    postgres::PgPoolOptions,
+    sqlite::SqlitePoolOptions,
+    {Error, Pool, Postgres, Sqlite},
+};
 
 use crate::Message;
 
@@ -67,7 +69,8 @@ pub async fn init_db(test: bool) -> Result<DbWrapper, sqlx::Error> {
         Err(_) => "postgres://postgres:mysecretpassword@localhost/postgres".to_string(),
     };
 
-    let create_db_query = "CREATE TABLE IF NOT EXISTS messages (
+    let create_db_query = "
+    CREATE TABLE IF NOT EXISTS messages (
         username TEXT NOT NULL,
         message TEXT NOT NULL
     )";
@@ -95,4 +98,19 @@ pub async fn init_db(test: bool) -> Result<DbWrapper, sqlx::Error> {
     };
 
     return Ok(pool);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::init_db;
+
+    #[tokio::test]
+    async fn test_init_db() {
+        match init_db(true).await {
+            Ok(_) => {},
+            Err(e) => {
+                panic!("Error: failed to initialize database. {}", e)
+            }
+        }
+    }
 }

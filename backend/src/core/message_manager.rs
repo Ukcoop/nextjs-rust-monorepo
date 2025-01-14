@@ -4,13 +4,13 @@ use sqlx::{Error, FromRow};
 
 use crate::services::database::Database;
 
-#[derive(Serialize, Deserialize, FromRow, Debug)]
+#[derive(Serialize, Deserialize, FromRow, Clone, Debug, PartialEq)]
 pub struct Message {
     pub username: String,
     pub message: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Messages {
     pub messages: Vec<Message>,
 }
@@ -32,3 +32,53 @@ pub async fn post_message(message: Json<Message>, db: &dyn Database) -> Result<(
 
     return Ok(());
 }
+
+#[cfg(test)]
+mod tests {
+    use actix_web::web::Json;
+    use crate::{init_db, services::database::DbWrapper};
+    use super::{get_messages, post_message, Message};
+
+    async fn initialize_test_db() -> DbWrapper {
+        return init_db(true).await.unwrap_or_else(|e| {
+            panic!("Error: failed to initialize database. {}", e)
+        });
+    }
+
+    fn create_test_message() -> Message {
+        return Message {
+            username: "testy".to_string(),
+            message: "Hello, im testy!".to_string(),
+        };
+    }
+
+    async fn post_test_message(db: &DbWrapper, message: Message) {
+        return post_message(Json(message), db).await.unwrap_or_else(|e| {
+            panic!("Error: failed to post message. {}", e)
+        });
+    }
+
+    #[tokio::test]
+    async fn test_post_message() {
+        let db = initialize_test_db().await;
+        let test_message = create_test_message();
+        post_test_message(&db, test_message).await;
+    }
+
+    #[tokio::test]
+    async fn test_get_message() {
+        let db = initialize_test_db().await;
+        let test_message = create_test_message();
+        post_test_message(&db, test_message.clone()).await;
+
+        match get_messages(&db).await {
+            Ok(result) => {
+                assert_eq!(result.messages[0], test_message)
+            },
+            Err(e) => {
+                panic!("Error: failed to get messages. {}", e)
+            }
+        }
+    }
+}
+
