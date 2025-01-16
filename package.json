@@ -5,7 +5,8 @@
     "frontend": "npm run dev --workspace=frontend",
     "backend": "cargo run backend",
     "database": "docker run --rm -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 postgres:15-alpine",
-    "test-deployment": "docker compose up --build"
+    "test-deployment": "docker compose up --build",
+    "cypress": "npm run cypress --workspace=frontend"
   },
   "author": "Alexander Cooper",
   "license": "MIT",

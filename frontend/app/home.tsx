@@ -61,15 +61,15 @@ export default function Home({ baseUrl }: { baseUrl: string }) {
     <div className="h-screen max-h-screen bg-white dark:bg-gray-950">
       <div className="flex flex-col">
         <div className="flex pt-2 px-2">
-          <div className="w-64 pr-2"><InputField type="text" value={username} setValue={setUsername}/></div>
-          <InputField type="text" value={message} setValue={setMessage}/>
-          <Button text="send" style="primary" onClick={sendMessage}/>
-          <Button text={<RefreshIcon/>} style="secondary" onClick={getMessages}/>
+          <div className="w-64 pr-2"><InputField testId="cypress-username" type="text" value={username} setValue={setUsername}/></div>
+          <InputField testId="cypress-message" type="text" value={message} setValue={setMessage}/>
+          <Button testId="cypress-send" text="send" style="primary" onClick={sendMessage}/>
+          <Button testId="cypress-refresh" text={<RefreshIcon/>} style="secondary" onClick={getMessages}/>
         </div>
         {(status.code !== 'ok') && <div className="px-2"><Status status={status}/></div>}
       </div>
         <div className="h-0 border-2 border-transparent border-t-gray-500"></div>
-        <div className="h-[93vh] overflow-auto p-2">
+        <div data-cy="cypress-messages" className="h-[93vh] overflow-auto p-2">
           {
           response.messages.map((message, index) => {
             return (

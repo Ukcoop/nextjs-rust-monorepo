@@ -4,15 +4,16 @@ const styles = {
 };
 
 interface ButtonParams {
+  testId: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   text: any;
   style: keyof typeof styles;
   onClick: () => unknown;
 }
 
-export default function Button({ text, style, onClick }: ButtonParams) {
+export default function Button({ testId, text, style, onClick }: ButtonParams) {
   return (
-    <div className={styles[style]} onClick={onClick}>
+    <div data-cy={testId} className={styles[style]} onClick={onClick}>
       <a>{text}</a>
     </div>
   );
